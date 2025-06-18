@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #2e86de;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #2e86de;
+            color: white;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #1c5cbf;
+        }
+
+        #chatBox {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            background-color: #fdfdfd;
+        }
+
+        #chatBox div {
+            margin: 8px 0;
+        }
+
+        #chatBox b {
+            color: #2e86de;
+        }
+
+        #userInput {
+            width: 75%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        footer {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+            padding: 20px;
+        }
+    </style>
+    <script>
+        async function uploadPDF() {
+            const fileInput = document.getElementById("pdfFile");
+            const formData = new FormData();
+            formData.append("pdf", fileInput.files[0]);
+
+            const res = await fetch("/upload", {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+        }
+
+        async function sendMessage() {
+            const message = document.getElementById("userInput").value;
+            const chatBox = document.getElementById("chatBox");
+            chatBox.innerHTML += `<div><b>You:</b> ${message}</div>`;
+
+            const res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            });
+            const data = await res.json();
+            chatBox.innerHTML += `<div><b>Bot:</b> ${data.response}</div>`;
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Chat with your PDF</h1>
+    </header>
+    <main>
+        <input type="file" id="pdfFile" accept="application/pdf"/>
+        <button onclick="uploadPDF()">Upload PDF</button>
+        <hr>
+        <div id="chatBox"></div>
+        <input type="text" id="userInput" placeholder="Ask a question..." />
+        <button onclick="sendMessage()">Send</button>
+    </main>
+    <footer>
+        PDF Chatbot | Local LLM with Transformers | Powered by Flask & LangChain
+    </footer>
+</body>
+</html>
